@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema path="/com/github/alainm23/snipy/" id="com.github.alainm23.snipy" gettext-domain="com.github.alainm23.snipy">
+    <key name="window-position" type="(ii)">
+      <default>(-1, -1)</default>
+      <summary>Window position</summary>
+      <description>Most recent window position (x, y)</description>
+    </key>
+
+    <key name="window-size" type="(ii)">
+      <default>(1160, 795)</default>
+      <summary>Most recent window size</summary>
+      <description>Most recent window size (width, height)</description>
+    </key>
+
+    <key name="paned-start-position" type="i">
+      <default>190</default>
+      <summary>Most recent position of the folders pane</summary>
+      <description>Most recent position of the folders pane</description>
+    </key>
+    
+    <key name="paned-end-position" type="i">
+      <default>400</default>
+      <summary>Most recent position of the conversation list pane</summary>
+      <description>Most recent position of the conversation list pane</description>
+    </key>
+  </schema>
+</schemalist>

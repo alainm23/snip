@@ -21,14 +21,17 @@ public class MainWindow : Hdy.Window {
     private Gtk.Paned paned_start;
     private Gtk.Paned paned_end;
 
+    private Widgets.Welcome welcome;
     private Widgets.Sidebar sidebar;
     private Widgets.Snippets snippets;
+
+    private uint configure_id = 0;
 
     public MainWindow (Gtk.Application application) {
         Object (
             application: application,
-            icon_name: "com.github.alainm23.snip",
-            title: _("Snip")
+            icon_name: "com.github.alainm23.snipy",
+            title: _("Snipy")
         );
     }
 
@@ -39,10 +42,9 @@ public class MainWindow : Hdy.Window {
         snippets = new Widgets.Snippets ();
 
         var code_header = new Hdy.HeaderBar ();
-        code_header.decoration_layout = "";
+        code_header.decoration_layout = ":maximise";
         code_header.has_subtitle = false;
         code_header.show_close_button = true;
-        // code_header.get_style_context ().add_class ("sidebar-header");
         code_header.get_style_context ().add_class (Gtk.STYLE_CLASS_FLAT);
 
         var code_label = new Gtk.Label ("Code");
@@ -62,15 +64,53 @@ public class MainWindow : Hdy.Window {
         paned_end.pack1 (paned_start, false, false);
         paned_end.pack2 (code_grid, true, true);
 
-        add (paned_end);
+        welcome = new Widgets.Welcome ();
+
+        var main_stack = new Gtk.Stack ();
+        main_stack.expand = true;
+        main_stack.transition_type = Gtk.StackTransitionType.NONE;
+
+        main_stack.add_named (welcome, "welcome");
+        main_stack.add_named (paned_end, "main");
+
+        add (main_stack);
+
+        Snipy.settings.bind ("paned-start-position", paned_start, "position", SettingsBindFlags.DEFAULT);
+        Snipy.settings.bind ("paned-end-position", paned_end, "position", SettingsBindFlags.DEFAULT);
+
+        welcome.activated.connect ((index) => {
+            switch (index) {
+                case 0:
+                    main_stack.visible_child_name = "main";
+                    break;
+                case 1:
+                    var oauth = new Dialogs.GitHubOAuth ();
+                    oauth.show_all ();
+                    break;
+                default:
+                    break;
+                }
+        });
     }
 
     public override bool configure_event (Gdk.EventConfigure event) {
-        int root_x, root_y;
-        get_position (out root_x, out root_y);
-        
-        // Harvey.settings.set_int ("window-x", root_x);
-        // Harvey.settings.set_int ("window-y", root_y);
+        if (configure_id != 0) {
+            GLib.Source.remove (configure_id);
+        }
+
+        configure_id = Timeout.add (100, () => {
+            configure_id = 0;
+            
+            Gdk.Rectangle rect;
+            get_allocation (out rect);
+            Snipy.settings.set ("window-size", "(ii)", rect.width, rect.height);
+
+            int root_x, root_y;
+            get_position (out root_x, out root_y);
+            Snipy.settings.set ("window-position", "(ii)", root_x, root_y);
+
+            return GLib.Source.REMOVE;
+        });
 
         return base.configure_event (event);
     }

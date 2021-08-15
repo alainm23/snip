@@ -18,16 +18,18 @@
 *
 */
 
-public class Snip : Gtk.Application {
+public class Snipy : Gtk.Application {
     public static GLib.Settings settings;
+    public static Services.Gist gist;
 
-    public Snip () {
-        Object (application_id: "com.github.alainm23.snip",
+    public Snipy () {
+        Object (application_id: "com.github.alainm23.snipy",
         flags: ApplicationFlags.FLAGS_NONE);
     }
 
     static construct {
-        // settings = new Settings ("com.github.alainm23.snip");
+        settings = new Settings ("com.github.alainm23.snipy");
+        gist = new Services.Gist ();
     }
 
     protected override void activate () {
@@ -38,12 +40,17 @@ public class Snip : Gtk.Application {
 
         var app_window = new MainWindow (this);
 
-        // var window_x = settings.get_int ("window-x");
-        // var window_y = settings.get_int ("window-y");
+        app_window.set_size_request (945, 579);
 
-        //  if (window_x != -1 || window_y != -1) {
-        //      app_window.move (window_x, window_y);
-        //  }
+        int window_x, window_y;
+        int width, height;
+
+        settings.get ("window-position", "(ii)", out window_x, out window_y);
+        settings.get ("window-size", "(ii)", out width, out height);
+
+        if (window_x != -1 || window_y != -1) {
+            app_window.move (window_x, window_y);
+        }
 
         app_window.show_all ();
 
@@ -52,9 +59,9 @@ public class Snip : Gtk.Application {
         add_action (quit_action);
         set_accels_for_action ("app.quit", {"<Control>q"});
 
-        //  var provider = new Gtk.CssProvider ();
-        //  provider.load_from_resource ("com/github/danrabbit/harvey/Application.css");
-        //  Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        var provider = new Gtk.CssProvider ();
+        provider.load_from_resource ("com/github/alainm23/snipy/stylesheet.css");
+        Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
         Gtk.Settings.get_default ().set_property ("gtk-icon-theme-name", "elementary");
         Gtk.Settings.get_default ().set_property ("gtk-theme-name", "io.elementary.stylesheet.blueberry");
@@ -67,7 +74,7 @@ public class Snip : Gtk.Application {
     }
 
     public static int main (string[] args) {
-        var app = new Snip ();
+        var app = new Snipy ();
         return app.run (args);
     }
 }
